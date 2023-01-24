@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: Risk-KYC APIs
+  description: |-
+    Endpoints for risk-kyc repo
+  version: 1.0.0
+servers:
+  - url: http://localhost:10056
+paths:
+  /v1/kyc/merchant/stakeholder/verify:
+    post:
+      summary: Initialize individual KYC request
+      parameters:
+        - name: merchantId
+          in: query
+          description: ID of the merchant issuing the request
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: kycCustomerId
+          in: query
+          description: entityId for merchant that Nova wants to kyc
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: firstName
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: taxId
+          in: query
+          schema:
+            type: string
+        - name: dateOfBirth
+          in: query
+          schema:
+            type: string
+        - name: country
+          in: query
+          schema:
+            type: string
+        - name: address
+          in: query
+          schema:
+            $ref: '#/components/schemas/Address'
+        - name: phone
+          in: query
+          schema:
+            type: string
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: documentInfo
+          in: query
+          schema:
+            $ref: '#/components/schemas/DocumentInfo'
+        - name: consentInfo
+          in: query
+          schema:
+            $ref: '#/components/schemas/ConsentInfo'
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        '400':
+          description: Invalid input
+
+components:
+  schemas:
+    Address:
+      type: object
+      properties:
+        line1:
+          type: string
+          example: '1 main st'
+        line2:
+          type: string
+        line3:
+          type: string
+          description: "address line 3, currently unused by Nova"
+        district:
+          type: string
+          example: 'MA'
+        city:
+          type: string
+          example: 'boston'
+        postalCode:
+          type: string
+          example: '12345'
+
+    DocumentInfo:
+      type: object
+      properties:
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+        countryCode:
+          type: string
+          description: "ISO 3166-2"
+          example: 'US'
+        frontImageId:
+          type: string
+          format: uuid
+          description: "ID for secure file service"
+        backImageId:
+          type: string
+          format: uuid
+          description: "ID for secure file service"
+      required:
+        - documentType
+        - countryCode
+        - frontImageId
+
+    DocumentType:
+      type: string
+      nullable: false
+      enum:
+        - PASSPORT
+        - ID_CARD
+        - DRIVING_LICENSE
+        - VISA
+
+    ConsentInfo:
+      type: object
+      properties:
+        ipAddress:
+          type: string
+          example: '0.0.0.0'
+        ipCountry:
+          type: string
+          example: 'USA'
+          description: '3 letter country code'
+        timestamp:
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          description: 'Format: YYYY-MM-DDThh:mm:ss.SSSZ (ISO8601)'
+      required:
+        - ipAddress
+        - ipCountry
+        - timestamp
